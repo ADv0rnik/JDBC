@@ -14,7 +14,9 @@ public class Runner {
         Statement stmt = null;
         List<Segment> list = new ArrayList<>();
         try {
+            System.out.println("Connecting database...");
             conn = DriverManager.getConnection(DB_URL, USER, PASS);
+            System.out.println("Connection created");
             stmt = conn.createStatement();
             //1
             try {
@@ -26,6 +28,7 @@ public class Runner {
                     Segment segment = new Segment(len, num);
                     list.add(segment);
                 }
+                System.out.println("SQL query:");
                 for (Segment segment : list)
                     System.out.println(segment);
             } catch (IndexOutOfBoundsException e) {
@@ -41,15 +44,40 @@ public class Runner {
                 }
             }
             //2
-            stmt = conn.createStatement();
-            stmt.executeUpdate("TRUNCATE TABLE coordinates.frequencies");
-            PreparedStatement preparedStatement = conn.prepareStatement("INSERT INTO coordinates.frequencies(len, num) VALUES (?, ?)");
-            for (Segment segment : list) {
-                preparedStatement.setString(1, String.valueOf(segment.getLen()));
-                preparedStatement.setString(2, String.valueOf(segment.getNum()));
-                preparedStatement.addBatch();
+            try{
+                stmt = conn.createStatement();
+                stmt.executeUpdate("TRUNCATE TABLE coordinates.frequencies");
+                PreparedStatement preparedStatement = conn.prepareStatement("INSERT INTO coordinates.frequencies(len, num) VALUES (?, ?)");
+                for (Segment segment : list) {
+                    preparedStatement.setString(1, String.valueOf(segment.getLen()));
+                    preparedStatement.setString(2, String.valueOf(segment.getNum()));
+                    preparedStatement.addBatch();
+                }
+                preparedStatement.executeBatch();
+
+            } catch (Exception e) {
+                System.out.println(e.toString());
+            } finally {
+                try {
+                    if (stmt != null)
+                        stmt.close();
+                } catch (SQLException throwables) {
+                    throwables.printStackTrace();
+                }
             }
-            preparedStatement.executeBatch();
+            //3
+            try{
+                stmt = conn.createStatement();
+                ResultSet resultSet = stmt.executeQuery("SELECT len, num FROM coordinates.frequencies WHERE len > num");
+                System.out.println("Record found:");
+                while (resultSet.next()){
+                    String len = resultSet.getString(1);
+                    String num = resultSet.getString(2);
+                    System.out.println(len + ";" + num);
+                }
+            }catch (SQLSyntaxErrorException e) {
+                System.out.println("SQL syntax error:" + e.toString());
+            }
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
