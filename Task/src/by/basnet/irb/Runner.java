@@ -43,6 +43,13 @@ public class Runner {
             //2
             stmt = conn.createStatement();
             stmt.executeUpdate("TRUNCATE TABLE coordinates.frequencies");
+            PreparedStatement preparedStatement = conn.prepareStatement("INSERT INTO coordinates.frequencies(len, num) VALUES (?, ?)");
+            for (Segment segment : list) {
+                preparedStatement.setString(1, String.valueOf(segment.getLen()));
+                preparedStatement.setString(2, String.valueOf(segment.getNum()));
+                preparedStatement.addBatch();
+            }
+            preparedStatement.executeBatch();
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
