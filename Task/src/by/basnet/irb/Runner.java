@@ -10,8 +10,8 @@ public class Runner {
     static final String PASS = "root";
 
     public static void main(String[] args) {
-        Connection conn = null;
-        Statement stmt = null;
+        Connection conn;
+        Statement stmt;
         List<Segment> list = new ArrayList<>();
         try {
             System.out.println("Connecting database...");
