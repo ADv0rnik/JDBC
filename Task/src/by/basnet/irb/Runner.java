@@ -16,7 +16,7 @@ public class Runner {
         try {
             System.out.println("Connecting database...");
             conn = DriverManager.getConnection(DB_URL, USER, PASS);
-            System.out.println("Connection created");
+            System.out.println("Сonnection is established");
             stmt = conn.createStatement();
             //1
             try {
@@ -77,6 +77,13 @@ public class Runner {
                 }
             }catch (SQLSyntaxErrorException e) {
                 System.out.println("SQL syntax error:" + e.toString());
+            } finally {
+                try {
+                    if (stmt != null)
+                        stmt.close();
+                } catch (SQLException throwables) {
+                    throwables.printStackTrace();
+                }
             }
         } catch (SQLException throwables) {
             throwables.printStackTrace();
